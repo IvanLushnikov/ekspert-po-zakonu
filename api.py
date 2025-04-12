@@ -58,20 +58,23 @@ def ask():
         prompt = f"Ты эксперт по 44-ФЗ. Ответь на вопрос пользователя максимально полно:\n\nВопрос: {user_question}"
 
     try:
-        # Отправка запроса в OpenAI
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
+        # Отправка запроса в OpenAI (используется новый способ API)
+        response = openai.Completion.create(
+            model="gpt-3.5-turbo",  # Используется модель GPT-3.5
+            prompt=prompt,           # Ваш вопрос и контекст
+            max_tokens=150,          # Ограничение на количество токенов
+            temperature=0.7,         # Настройка температуры для генерации
         )
         # Получаем ответ и отправляем его клиенту
-        answer = response.choices[0].message["content"]
-        print("Ответ от OpenAI:", answer)  # Добавьте эту строку для логирования ответа
+        answer = response.choices[0].text.strip()
         return jsonify({"answer": answer})
+
     except Exception as e:
         # Обработка ошибок, если запрос не удался
         print("❌ Ошибка OpenAI:", e)
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))  # Получаем порт из окружения
+    # Получаем порт из окружения или используем 8000 по умолчанию
+    port = int(os.environ.get("PORT", 8000))
     app.run(debug=True, host='0.0.0.0', port=port)
