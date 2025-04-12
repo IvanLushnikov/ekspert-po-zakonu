@@ -1,1 +1,4 @@
+Flask
 gunicorn
+openai
+flask-cors
