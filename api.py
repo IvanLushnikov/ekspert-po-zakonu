@@ -8,6 +8,7 @@ from pathlib import Path
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+# Получаем ключ из переменной окружения
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Загрузка базы знаний
@@ -28,6 +29,7 @@ def simple_search(user_question):
         if user_question.lower() in item["question"].lower()
     ][:3]
 
+# Главный маршрут для чата
 @app.route("/ask", methods=["POST", "OPTIONS"])
 def ask():
     if request.method == "OPTIONS":
@@ -61,6 +63,18 @@ def ask():
         print("❌ Ошибка OpenAI:", e)
         return jsonify({"error": str(e)}), 500
 
+# Тестовый эндпоинт для проверки API-ключа
+@app.route("/check-key", methods=["GET"])
+def check_key():
+    try:
+        models = openai.models.list()
+        model_names = [m.id for m in models.data]
+        return jsonify({"status": "ok", "models": model_names})
+    except Exception as e:
+        print("❌ Ошибка при проверке ключа:", e)
+        return jsonify({"status": "error", "message": str(e)}), 401
+
+# Запуск сервера
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     app.run(debug=True, host='0.0.0.0', port=port)
