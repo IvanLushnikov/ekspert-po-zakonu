@@ -4,8 +4,8 @@ document.getElementById('ask-question').addEventListener('click', async function
         const chatBox = document.getElementById('chat-box');
         chatBox.innerHTML += `<p><strong>Вы:</strong> ${question}</p>`;
 
-        // Запрос к бэкенду на Render
-        const response = await fetch('https://your-render-api-endpoint.com/ask', {
+   // Запрос к бэкенду на Render
+        const response = await fetch('https://ekspert-po-zakonu.onrender.com/ask', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
