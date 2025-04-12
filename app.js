@@ -14,6 +14,7 @@ document.getElementById('ask-question').addEventListener('click', async function
         });
 
         const data = await response.json();
+        console.log(data);
         chatBox.innerHTML += `<p><strong>Эксперт:</strong> ${data.answer}</p>`;
     }
 });
