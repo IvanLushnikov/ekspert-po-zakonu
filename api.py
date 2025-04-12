@@ -26,7 +26,7 @@ except Exception as e:
 # === Функция для получения embedding ===
 def get_embedding(text, model="text-embedding-3-small"):
     text = text.replace("\n", " ")
-    response = openai.embeddings.create(input=[text], model=model)
+    response = openai.Embedding.create(input=[text], model=model)
     return np.array(response.data[0].embedding)
 
 # === Поиск ближайших вопросов ===
@@ -63,7 +63,7 @@ def ask():
     try:
         print("🧪 Запрос в OpenAI...")
         response = openai.chat.completions.create(
-            model="gpt-4o",  # Можно поменять на gpt-3.5-turbo
+            model="gpt-3.5-turbo",  
             messages=[{"role": "user", "content": prompt}],
             max_tokens=300,
             temperature=0.7,
