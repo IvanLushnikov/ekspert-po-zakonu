@@ -9,7 +9,7 @@ from pathlib import Path
 from numpy.linalg import norm
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -40,40 +40,41 @@ def search_similar_questions(question, top_n=3):
 @app.route("/ask", methods=["POST", "OPTIONS"])
 def ask():
     if request.method == "OPTIONS":
-        # Явный ответ на preflight-запрос
-        response = make_response('', 200)
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        return response
-
-    data = request.get_json()
-    user_question = data.get("question", "")
-    print("📥 Вопрос пользователя:", user_question)
+        # Явный preflight-ответ
+        response = make_response()
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        return response, 200
 
     try:
-        context_items = search_similar_questions(user_question)
-    except Exception as e:
-        print("❌ Ошибка при поиске embedding:", e)
-        context_items = []
+        data = request.get_json()
+        user_question = data.get("question", "")
+        print("📥 Вопрос пользователя:", user_question)
 
-    context = "\n\n".join([f"Вопрос: {i['question']}\nОтвет: {i['answer']}" for i in context_items])
-    print("📚 Контекст найден:", context != "")
+        try:
+            context_items = search_similar_questions(user_question)
+        except Exception as e:
+            print("❌ Ошибка при поиске embedding:", e)
+            context_items = []
 
-    if context.strip():
-        prompt = f"Ты эксперт по 44-ФЗ. Используй контекст ниже, чтобы ответить на вопрос:\n\n{context}\n\nВопрос: {user_question}"
-    else:
-        prompt = f"Ты эксперт по 44-ФЗ. Ответь на вопрос пользователя максимально полно:\n\nВопрос: {user_question}"
+        context = "\n\n".join([f"Вопрос: {i['question']}\nОтвет: {i['answer']}" for i in context_items])
+        print("📚 Контекст найден:", context != "")
 
-    try:
+        if context.strip():
+            prompt = f"Ты эксперт по 44-ФЗ. Используй контекст ниже, чтобы ответить на вопрос:\n\n{context}\n\nВопрос: {user_question}"
+        else:
+            prompt = f"Ты эксперт по 44-ФЗ. Ответь на вопрос пользователя максимально полно:\n\nВопрос: {user_question}"
+
         print("🧪 Запрос в OpenAI...")
-        response = openai.chat.completions.create(
+        completion = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=300,
             temperature=0.7,
         )
-        answer = response.choices[0].message.content
+        answer = completion.choices[0].message.content
+
         response = jsonify({"answer": answer})
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response
@@ -83,6 +84,7 @@ def ask():
         response = jsonify({"error": str(e)})
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response, 500
+
 
 # === Проверка ключа ===
 @app.route("/check-key", methods=["GET"])
