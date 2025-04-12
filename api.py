@@ -3,7 +3,7 @@ import csv
 import openai
 import numpy as np
 import pandas as pd
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from pathlib import Path
 from numpy.linalg import norm
@@ -40,7 +40,12 @@ def search_similar_questions(question, top_n=3):
 @app.route("/ask", methods=["POST", "OPTIONS"])
 def ask():
     if request.method == "OPTIONS":
-        return '', 200
+        # Явный ответ на preflight-запрос
+        response = make_response('', 200)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        return response
 
     data = request.get_json()
     user_question = data.get("question", "")
@@ -63,17 +68,21 @@ def ask():
     try:
         print("🧪 Запрос в OpenAI...")
         response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",  
+            model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=300,
             temperature=0.7,
         )
         answer = response.choices[0].message.content
-        return jsonify({"answer": answer})
+        response = jsonify({"answer": answer})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
 
     except Exception as e:
         print("❌ Ошибка OpenAI:", e)
-        return jsonify({"error": str(e)}), 500
+        response = jsonify({"error": str(e)})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response, 500
 
 # === Проверка ключа ===
 @app.route("/check-key", methods=["GET"])
