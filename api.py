@@ -65,6 +65,7 @@ def ask():
         )
         # Получаем ответ и отправляем его клиенту
         answer = response.choices[0].message["content"]
+        print("Ответ от OpenAI:", answer)  # Добавьте эту строку для логирования ответа
         return jsonify({"answer": answer})
     except Exception as e:
         # Обработка ошибок, если запрос не удался
