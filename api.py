@@ -58,15 +58,15 @@ def ask():
         prompt = f"Ты эксперт по 44-ФЗ. Ответь на вопрос пользователя максимально полно:\n\nВопрос: {user_question}"
 
     try:
-        # Отправка запроса в OpenAI (используется новый способ API)
-        response = openai.Completion.create(
+        # Отправка запроса в OpenAI (с использованием нового метода для GPT-3.5 и выше)
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",  # Используется модель GPT-3.5
-            prompt=prompt,           # Ваш вопрос и контекст
-            max_tokens=150,          # Ограничение на количество токенов
-            temperature=0.7,         # Настройка температуры для генерации
+            messages=[{"role": "user", "content": prompt}],  # Новый формат передачи данных
+            max_tokens=150,  # Ограничение на количество токенов
+            temperature=0.7,  # Настройка температуры для генерации
         )
         # Получаем ответ и отправляем его клиенту
-        answer = response.choices[0].text.strip()
+        answer = response.choices[0].message["content"]
         return jsonify({"answer": answer})
 
     except Exception as e:
