@@ -59,15 +59,19 @@ def ask():
             context_items = []
 
         context = "\n\n".join([f"Вопрос: {i['question']}\nОтвет: {i['answer']}" for i in context_items])
-           if context.strip():
+
+        if context.strip():
             prompt = f"""Ты — эксперт по государственным закупкам в РФ.
 Используй только информацию из контекста ниже, чтобы ответить на вопрос. Не добавляй ничего от себя.
+
 Контекст:
 {context}
+
 Вопрос: {user_question}"""
         else:
             prompt = f"""Ты — эксперт по государственным закупкам в РФ.
 Ответь на вопрос максимально точно и ссылайся на нормативные документы, если это возможно.
+
 Вопрос: {user_question}"""
 
         print("🧪 Запрос в OpenAI...")
@@ -89,7 +93,6 @@ def ask():
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response, 500
 
-
 # === Проверка ключа ===
 @app.route("/check-key", methods=["GET"])
 def check_key():
@@ -98,4 +101,3 @@ def check_key():
         return jsonify({"status": "ok", "models": [m.id for m in models.data]})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 401
-
