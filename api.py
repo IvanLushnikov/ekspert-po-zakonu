@@ -95,7 +95,3 @@ def check_key():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 401
 
-# === Запуск локально ===
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
-    app.run(debug=True, host='0.0.0.0', port=port)
