@@ -9,13 +9,7 @@ from pathlib import Path
 from numpy.linalg import norm
 
 app = Flask(__name__)
-
-@app.after_request
-def apply_cors(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-    return response
+CORS(app)
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
