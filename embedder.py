@@ -5,7 +5,7 @@ import numpy as np
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-df = pd.read_csv("knowledge_base_updated.csv", sep=';')
+df = pd.read_csv("knowledge_base.csv", sep=';')
 
 def get_embedding(text, model="text-embedding-3-small"):
     text = text.replace("\n", " ")
