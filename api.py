@@ -34,13 +34,12 @@ def search_similar_questions(question, top_n=3):
     query_emb = get_embedding(question)
     df_kb["similarity"] = df_kb["embedding"].apply(lambda x: np.dot(x, query_emb) / (norm(x) * norm(query_emb)))
     top = df_kb.sort_values("similarity", ascending=False).head(top_n)
-    return top[["question", "answer"]].to_dict(orient="records")
+    return top["question"].tolist(), top["answer"].tolist(), top["similarity"].tolist()
 
 # === Основной маршрут ===
 @app.route("/ask", methods=["POST", "OPTIONS"])
 def ask():
     if request.method == "OPTIONS":
-        # Явный preflight-ответ
         response = make_response()
         response.headers["Access-Control-Allow-Origin"] = "*"
         response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
@@ -53,35 +52,28 @@ def ask():
         print("📥 Вопрос пользователя:", user_question)
 
         try:
-            context_items = search_similar_questions(user_question)
+            questions, answers, similarities = search_similar_questions(user_question)
         except Exception as e:
             print("❌ Ошибка при поиске embedding:", e)
-            context_items = []
+            questions, answers, similarities = [], [], []
 
-        context = "\n\n".join([f"Вопрос: {i['question']}\nОтвет: {i['answer']}" for i in context_items])
-
-        if context.strip():
-            prompt = f"""Ты — эксперт по государственным закупкам в РФ.
-Используй только информацию из контекста ниже, чтобы ответить на вопрос. Не добавляй ничего от себя.
-
-Контекст:
-{context}
-
-Вопрос: {user_question}"""
+        # Проверка на релевантность первого найденного ответа
+        if similarities and similarities[0] > 0.90:
+            best_answer = answers[0]
+            answer = f"💡 Ответ из базы знаний:\n{best_answer}"
         else:
-            prompt = f"""Ты — эксперт по государственным закупкам в РФ.
-Ответь на вопрос максимально точно и ссылайся на нормативные документы, если это возможно.
-
-Вопрос: {user_question}"""
-
-        print("🧪 Запрос в OpenAI...")
-        completion = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=300,
-            temperature=0.7,
-        )
-        answer = completion.choices[0].message.content
+            # Контекст для запроса в GPT
+            context = "\n\n".join([f"Вопрос: {q}\nОтвет: {a}" for q, a in zip(questions, answers)])
+            prompt = f"Ты — эксперт по государственным закупкам в РФ.\nИспользуй только информацию из контекста ниже, чтобы ответить на вопрос. Если ответа нет — скажи честно.\n\nКонтекст:\n{context}\n\nВопрос: {user_question}"
+            print("🧪 GPT-поиск, т.к. точного совпадения нет...")
+            completion = openai.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=400,
+                temperature=0.3,
+            )
+            gpt_answer = completion.choices[0].message.content.strip()
+            answer = f"🤖 Ответ GPT на основе базы знаний:\n{gpt_answer}"
 
         response = jsonify({"answer": answer})
         response.headers.add("Access-Control-Allow-Origin", "*")
