@@ -5,6 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Эксперт по закону</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        #loader {
+            display: none;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -20,6 +44,7 @@
             <input id="user-question" type="text" placeholder="Введите ваш вопрос...">
             <button id="ask-question">Задать вопрос</button>
             <div id="chat-box"></div>
+            <div id="loader"><span class="spinner"></span> Загрузка ответа...</div>
         </section>
     </main>
 
