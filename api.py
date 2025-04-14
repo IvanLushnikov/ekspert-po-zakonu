@@ -18,9 +18,9 @@ try:
     kb_path = Path(__file__).resolve().parent / "knowledge_base_with_embeddings.pkl"
     df_kb = pd.read_pickle(kb_path)
     df_kb["embedding"] = df_kb["embedding"].apply(np.array)
-    print("📚 База знаний с embedding загружена.")
+    print("База загружена.")
 except Exception as e:
-    print(f"❌ Ошибка при загрузке базы знаний: {e}")
+    print(f"Ошибка загрузки базы: {e}")
     df_kb = pd.DataFrame(columns=["question", "answer", "embedding"])
 
 # === Функция для получения embedding ===
@@ -54,7 +54,7 @@ def ask():
         try:
             questions, answers, similarities = search_similar_questions(user_question)
         except Exception as e:
-            print("❌ Ошибка при поиске embedding:", e)
+            print("Ошибка поиска embedding:", e)
             questions, answers, similarities = [], [], []
 
         # Проверка на релевантность первого найденного ответа
@@ -80,7 +80,7 @@ def ask():
         return response
 
     except Exception as e:
-        print("❌ Ошибка OpenAI:", e)
+        print("Ошибка OpenAI:", e)
         response = jsonify({"error": str(e)})
         response.headers.add("Access-Control-Allow-Origin", "*")
         return response, 500
