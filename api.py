@@ -6,9 +6,15 @@ import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-# === Flask-приложение ===
 app = Flask(__name__)
-CORS(app, origins=["https://ekspert-po-zakonu.vercel.app"])
+CORS(app, origins="*", methods=["GET", "POST", "OPTIONS"])
+
+@app.after_request
+def after_request(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+    return response
 
 # === OpenAI client ===
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
