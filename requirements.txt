@@ -1,7 +1,4 @@
-Flask
-gunicorn
-openai>=1.0.0
+flask
 flask-cors
-numpy
-pandas
-scikit-learn
+openai>=1.0.0
+faiss-cpu
