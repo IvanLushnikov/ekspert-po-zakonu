@@ -1,16 +1,17 @@
-import openai
 import os
+import openai
 from flask import Flask, request, jsonify
-from flask_cors import CORS  
+from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, origins=["https://ekspert-po-zakonu.vercel.app"]) 
+CORS(app, origins=["https://ekspert-po-zakonu.vercel.app"])
 
 # Загружаем текст законов из файла
 with open("all_laws_combined.txt", encoding="utf-8") as f:
     LAWS_TEXT = f.read()
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Клиент OpenAI под новую версию SDK
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route("/ask", methods=["POST"])
 def ask():
@@ -28,14 +29,13 @@ def ask():
     ]
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4-turbo",
             messages=messages,
             temperature=0.3
         )
         answer = response.choices[0].message.content
         return jsonify({"answer": answer})
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
