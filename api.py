@@ -1,3 +1,4 @@
+
 import os
 import json
 import faiss
@@ -27,7 +28,6 @@ index = faiss.read_index(INDEX_PATH)
 with open(META_PATH, encoding="utf-8") as f:
     metadata = json.load(f)
 
-# === Функция получения эмбеддинга ===
 def get_embedding(text):
     text = text.replace("\n", " ")
     result = client.embeddings.create(
@@ -36,22 +36,25 @@ def get_embedding(text):
     )
     return np.array(result.data[0].embedding, dtype="float32")
 
-# === Роут /ask с поиском по RAG ===
-@app.route("/ask", methods=["POST"])
+@app.route("/ask", methods=["POST", "OPTIONS"])
 def ask():
+    if request.method == "OPTIONS":
+        response = jsonify({"ok": True})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+        response.headers.add("Access-Control-Allow-Methods", "POST,OPTIONS")
+        return response, 200
+
     data = request.json
     user_question = data.get("question")
-
     if not user_question:
         return jsonify({"error": "No question provided"}), 400
 
-    # --- Поиск по FAISS ---
     query_vec = get_embedding(user_question).reshape(1, -1)
     D, I = index.search(query_vec, k=3)
     context_parts = [metadata[i]["text"] for i in I[0]]
     context = "\n\n".join(context_parts)
 
-    # --- Запрос к GPT ---
     messages = [
         {"role": "system", "content": "Ты — эксперт по государственным закупкам РФ. Отвечай строго по закону, но простыми словами. Ссылайся на статьи, если они есть."},
         {"role": "user", "content": f"Контекст:\n{context}\n\nВопрос: {user_question}"}
