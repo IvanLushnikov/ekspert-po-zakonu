@@ -27,7 +27,7 @@ def ask():
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4-1106-preview",
+            model="gpt-4-turbo",
             messages=messages,
             temperature=0.3
         )
