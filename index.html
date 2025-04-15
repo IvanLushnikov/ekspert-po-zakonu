@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эксперт по закону</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #loader {
+            display: none;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <h1>Эксперт по закону</h1>
+        </div>
+    </header>
+
+    <main>
+        <section class="intro">
+            <h2>Чат с экспертом по 44-ФЗ</h2>
+            <p>Задайте свой вопрос, и получите ответ от эксперта по законодательству.</p>
+            <input id="user-question" type="text" placeholder="Введите ваш вопрос...">
+            <button id="ask-question">Задать вопрос</button>
+            <div id="chat-box"></div>
+            <div id="loader"><span class="spinner"></span> Загрузка ответа...</div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 Эксперт по закону</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

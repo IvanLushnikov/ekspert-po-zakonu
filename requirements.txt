@@ -1,0 +1,7 @@
+Flask
+gunicorn
+openai>=1.0.0
+flask-cors
+numpy
+pandas
+scikit-learn
